@@ -64,11 +64,13 @@ type Config struct {
 	RoutinePoolSize int `envconfig:"ROUTINE_POOL_SIZE" validate:"required"`
 
 	// redis
-	RedisHost   string `envconfig:"REDIS_HOST" validate:"required"`
-	RedisPort   uint16 `envconfig:"REDIS_PORT" validate:"required"`
-	RedisPass   string `envconfig:"REDIS_PASSWORD"`
-	RedisUseSsl bool   `envconfig:"REDIS_USE_SSL"`
-	RedisDB     int    `envconfig:"REDIS_DB"`
+	CacheProvider string `envconfig:"CACHE_PROVIDER" validate:"required,oneof=redis credis"`
+	CredisCluster string `envconfig:"CREDIS_CLUSTER"`
+	RedisHost     string `envconfig:"REDIS_HOST"`
+	RedisPort     uint16 `envconfig:"REDIS_PORT"`
+	RedisPass     string `envconfig:"REDIS_PASSWORD"`
+	RedisUseSsl   bool   `envconfig:"REDIS_USE_SSL"`
+	RedisDB       int    `envconfig:"REDIS_DB"`
 
 	// database
 	DBType            string `envconfig:"DB_TYPE" default:"postgresql"`

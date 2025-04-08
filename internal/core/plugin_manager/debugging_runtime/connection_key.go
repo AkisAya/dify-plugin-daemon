@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/langgenius/dify-plugin-daemon/internal/utils/cache"
 	"github.com/langgenius/dify-plugin-daemon/internal/utils/log"
-	"github.com/redis/go-redis/v9"
 )
 
 /*
@@ -45,23 +44,21 @@ func GetConnectionKey(info ConnectionInfo) (string, error) {
 	)
 
 	if err == cache.ErrNotFound {
-		err := cache.Transaction(func(p redis.Pipeliner) error {
+		err := cache.Transaction(func(txp cache.TxPipe) error {
 			k := uuid.New().String()
-			_, err = cache.SetNX(
+			_, err = txp.SetNX(
 				strings.Join([]string{CONNECTION_KEY_MANAGER_ID2KEY_PREFIX, info.TenantId}, ":"),
 				Key{Key: k},
 				CONNECTION_KEY_EXPIRE_TIME,
-				p,
 			)
 			if err != nil {
 				return err
 			}
 
-			_, err = cache.SetNX(
+			_, err = txp.SetNX(
 				strings.Join([]string{CONNECTION_KEY_MANAGER_KEY2ID_PREFIX, k}, ":"),
 				info,
 				CONNECTION_KEY_EXPIRE_TIME,
-				p,
 			)
 			if err != nil {
 				return err

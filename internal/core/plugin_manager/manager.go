@@ -159,13 +159,17 @@ func (p *PluginManager) Launch(configuration *app.Config) {
 	log.Info("start plugin manager daemon...")
 
 	// init redis client
-	if err := cache.InitRedisClient(
-		fmt.Sprintf("%s:%d", configuration.RedisHost, configuration.RedisPort),
-		configuration.RedisPass,
-		configuration.RedisUseSsl,
-		configuration.RedisDB,
-	); err != nil {
-		log.Panic("init redis client failed: %s", err.Error())
+	// if err := cache.InitRedisClient(
+	// 	fmt.Sprintf("%s:%d", configuration.RedisHost, configuration.RedisPort),
+	// 	configuration.RedisPass,
+	// 	configuration.RedisUseSsl,
+	//	configuration.RedisDB,
+	// ); err != nil {
+	// 	log.Panic("init redis client failed: %s", err.Error())
+	// }
+
+	if err := cache.InitCache(configuration); err != nil {
+		log.Panic("init cache client failed: %s", err.Error())
 	}
 
 	invocation, err := real.NewDifyInvocationDaemon(

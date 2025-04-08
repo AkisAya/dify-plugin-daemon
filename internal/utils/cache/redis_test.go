@@ -6,8 +6,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -15,7 +13,9 @@ const (
 )
 
 func getRedisConnection() error {
-	return InitRedisClient("0.0.0.0:6379", "difyai123456", false, 0)
+	// return InitRedisClient("0.0.0.0:6379", "difyai123456", false, 0)
+	// return InitRedisClient("10.119.129.217:6379", "", false, 0)
+	return InitCredisClient("BDAI_HOMEFEEDS")
 }
 
 func TestRedisConnection(t *testing.T) {
@@ -41,13 +41,12 @@ func TestRedisTransaction(t *testing.T) {
 	defer Close()
 
 	// test transaction
-	err := Transaction(func(p redis.Pipeliner) error {
+	err := Transaction(func(txp TxPipe) error {
 		// set key
-		if err := Store(
+		if err := txp.Store(
 			strings.Join([]string{TEST_PREFIX, "key"}, ":"),
 			"value",
 			time.Second,
-			p,
 		); err != nil {
 			t.Errorf("store key failed: %v", err)
 			return err
@@ -77,13 +76,12 @@ func TestRedisTransaction(t *testing.T) {
 	}
 
 	// test success transaction
-	err = Transaction(func(p redis.Pipeliner) error {
+	err = Transaction(func(txp TxPipe) error {
 		// set key
-		if err := Store(
+		if err := txp.Store(
 			strings.Join([]string{TEST_PREFIX, "key"}, ":"),
 			"value",
 			time.Second,
-			p,
 		); err != nil {
 			t.Errorf("store key failed: %v", err)
 			return err
@@ -175,7 +173,7 @@ func TestRedisScanMap(t *testing.T) {
 		return
 	}
 
-	err = ScanMapAsync[s](strings.Join([]string{TEST_PREFIX, "map"}, ":"), "4", func(m map[string]s) error {
+	err = ScanMapAsync(strings.Join([]string{TEST_PREFIX, "map"}, ":"), "4", func(m map[string]s) error {
 		if len(m) != 1 {
 			t.Errorf("scan map async should return 1")
 			return errors.New("scan map async should return 1")
@@ -283,8 +281,9 @@ func TestGetRedisOptions(t *testing.T) {
 }
 
 func TestSetAndGet(t *testing.T) {
-	if err := InitRedisClient("127.0.0.1:6379", "difyai123456", false, 0); err != nil {
-		t.Fatal(err)
+	if err := getRedisConnection(); err != nil {
+		t.Errorf("get redis connection failed: %v", err)
+		return
 	}
 	defer Close()
 
